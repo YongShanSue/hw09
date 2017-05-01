@@ -29,7 +29,7 @@ class VEC {
 		double operator*(VEC &v1); // inner product
 		VEC operator*(double a); // V * dbl
 		VEC operator/(double a); // V / dbl
-
+		VEC absolute();		//absolute(vector)
 		double &operator[](int n); // indexing
 		void	print();
 	friend VEC operator*(double a,const VEC v1); // dbl x V
@@ -38,5 +38,5 @@ class VEC {
 };
 VEC operator*(double a,const VEC v1);
 VEC *newVEC(int n); // create dynamic VEC
-VEC absolute(VEC &v1);		//absolute(vector)
+//
 #endif	

@@ -84,3 +84,6 @@ int EVqrShifted(MAT &A,double mu,double tol,int maxiter);
 ///////HW8 function//////////////
 double NEV(double x,VEC &XS,VEC &YS,int n);		//Non-recursive Neville’s Algorithm
 double Lagrange(double x,VEC &XDATA,VEC &YDATA);//Lagrange Algorithm
+////////HW9 function/////////////////
+void splineM(int N,VEC &X,VEC &Y,VEC &M); // generate spline momentum M
+double spline(double x,int N,VEC &X,VEC &Y,VEC &M); // spline interp at x

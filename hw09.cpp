@@ -1,7 +1,7 @@
 
-//////HW08.cpp		 
+//////HW09.cpp		 
 //////Author:	YUNG-SHAN SU 
-//////Date: 4/25
+//////Date: 4/29
 
 
 ///////////////////////Tutorial
@@ -22,6 +22,7 @@ int main(int argc,char **argv){
     struct timeval start;               //Variable start time
     struct timeval stop;                //Variable stop timei
     int size =21;
+    int count=0;
     char rega,regb;
     VEC XDATA(size);
     VEC YDATA(size);
@@ -30,13 +31,17 @@ int main(int argc,char **argv){
     VEC XDATA_truth(x_end-x_first+1 );
     VEC YDATA_truth(x_end-x_first+1 );
     VEC YDATA_interpolation(x_end-x_first+1 );
+    VEC moment(size);
     ////////////Load the supported points/////////
+
     FILE *fPtr;
 	fPtr=fopen("f21.dat","r");
 	fscanf(fPtr,"%c\t%c\n",&rega,&regb);
 	for(int i=0;i< size ;i++)
 		fscanf(fPtr,"%lf\t%lf\n",&XDATA[i],&YDATA[i]);
 	fclose(fPtr);
+	//XDATA.print();
+    //YDATA.print();
 	////////////Load the ground truth/////////
 	FILE *fPtr1;
 	fPtr1=fopen("f301.dat","r");
@@ -45,20 +50,22 @@ int main(int argc,char **argv){
     	fscanf(fPtr1 , "%lf\t%lf\n" , &XDATA_truth[i],&YDATA_truth[i]); 
 	fclose(fPtr1);
     
-	//////////////Lagrange Interpolation
-	printf("x\ty\n");
-	int a=0;
-	for (int i = x_first ; i<=x_end ;i++){
-		YDATA_interpolation[a]=Lagrange((double)i,XDATA,YDATA);
-		printf("%d\t%lf\n",i,YDATA_interpolation[a]);
-		a++;
+	//////////////Spline Interpolation
+	printf("Spline Intepolation\t");
+	splineM(size,XDATA,YDATA,moment);
+	for(int i=x_first;i<=x_end;i++){
+		YDATA_interpolation[count] =	spline(i,size,XDATA,YDATA,moment);
+		count++;
 	}
+	YDATA_interpolation.print();
+
+
 	/////////////Find the max error
 	VEC difference_Y(YDATA_truth-YDATA_interpolation);
-	VEC error(absolute(difference_Y));
+	VEC error(difference_Y.absolute());
 	double maxerror=0;
 	for(int i=0;i<x_end-x_first+1;i++){
-		if(maxerror<error[i]&&XDATA_truth[i]>=550&&XDATA_truth[i]<=700)
+		if(maxerror<error[i]&&XDATA_truth[i]>=x_first&&XDATA_truth[i]<=x_end)
 			maxerror=error[i];
 	}
 	printf("Max Error:\t%lf\n",maxerror);

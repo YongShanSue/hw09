@@ -129,8 +129,8 @@ void	VEC::print(){
 		printf("%g\t",val[i]);
 	printf("\n");
 }
-VEC absolute(VEC &v1){
-	VEC v2(v1);
+VEC VEC::absolute(){
+	VEC v2(*this);
 	//double reg;
 	for(int i=0;i<v2.len();i++)
 		v2[i]=fabs(v2[i]);

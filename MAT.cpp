@@ -719,3 +719,63 @@ double Lagrange(double x,VEC &XDATA,VEC &YDATA){		//Lagrange Algorithm
 	int n=XDATA.len();
 	return NEV( x,XDATA,YDATA,n);
 }
+
+void splineM(int N,VEC &X,VEC &Y,VEC &M){// generate spline momentum M
+	MAT  system(N);
+	VEC  d(N);
+	system=0;
+	
+	/////////Boundary condition:	Usong zero boundary moments
+	d[0]=0;
+	d[N-1]=0;
+	system[0][1]=0;		//lambda0 = 0
+	system[N-1][N-2]=0; //un = 0
+	/////////Set the matrix diagonal
+	for(int i=0;i<N;i++)
+		system[i][i]=2;
+	/////////Set the matrix lambda and u and d
+	for(int i=1;i<N-1;i++){
+		system[i][i-1]=(X[i]-X[i-1])/(X[i+1]-X[i-1]);		//Set u
+		system[i][i+1]=(X[i+1]-X[i])/(X[i+1]-X[i-1]);		//Set lambda
+	}
+
+	for(int i=1;i<N-1;i++){
+		d[i]=6.0/(X[i+1]-X[i-1])*(	(Y[i+1]-Y[i])/(X[i+1]-X[i])- (Y[i]-Y[i-1]) / (X[i]-X[i-1])	);
+	}
+	////////////////LU decomposition////////////////////////////////////////////////
+	luFact(system);			//lu decomposition
+	/////////////Produce u///////////
+	MAT u(N);							//Declare u
+	u=0;								//Set u to 0
+	for(int i=0;i<N;i++)
+		for(int j=i;j<N;j++)
+			u[i][j]=system[i][j];//Produce u
+	/////////////Produce l///////////
+	MAT l(N);							//Delare l
+	l=0;								//Set l to 0
+	for(int i=0;i<N;i++){
+		for(int j=0;j<i;j++)
+			l[i][j]=system[i][j];//Produce l
+		l[i][i]=1;
+	}
+	VEC y=fwdSubs(l,d);
+	M=bckSubs(u,y);
+	return;
+} 
+double spline(double x,int N,VEC &X,VEC &Y,VEC &M){// spline interp at x
+	int interval_index=0;
+	int check=0;
+	////////////Find the interpolation interval
+	while(check!=1 && interval_index<=X[N-1] ){
+		if (x>=X[interval_index]  && x<=X[interval_index+1])
+			check=1;
+		else 
+			interval_index++;
+	}
+	double h=X[interval_index+1]-X[interval_index];
+	double a=Y[interval_index];
+	double b=(Y[interval_index+1]-Y[interval_index])/h-h/6*(M[interval_index+1]+2*M[interval_index]);
+	double r=M[interval_index]/2;
+	double delta=(M[interval_index+1]-M[interval_index])/(6*h);
+	return (a + b*(x-X[interval_index]) + r* (x-X[interval_index])*(x-X[interval_index]) + delta*(x-X[interval_index])*(x-X[interval_index])*(x-X[interval_index]));
+}
